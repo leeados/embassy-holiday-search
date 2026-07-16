@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
 import { addMonths, formatISO } from "date-fns";
 import type { ClosureDay, ScanRequest, ScanResult } from "./types";
 
@@ -80,13 +80,15 @@ For each closure day found, note: the exact date (and end date if it spans multi
 
 Be thorough but do not guess or fabricate dates you cannot support with a source. If you cannot find reliable information for some part of the ${rangeStart} to ${rangeEnd} window, say so explicitly rather than inventing entries.
 
-Write your findings as a clear structured list.`;
+Write your findings as a terse bullet list, one line per closure day: date — title — category — source. No preamble, no summary paragraph.`;
 
   const response = await client.models.generateContent({
     model: MODEL,
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }],
+      maxOutputTokens: 3072,
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
     },
   });
 
@@ -130,6 +132,8 @@ ${research.researchText}
     config: {
       responseMimeType: "application/json",
       responseSchema: closureSchema,
+      maxOutputTokens: 4096,
+      thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
     },
   });
 
